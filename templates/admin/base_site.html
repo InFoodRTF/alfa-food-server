@@ -1,0 +1,21 @@
+ {% extends "admin/base_site.html" %}
+
+{% load static %}
+
+
+    {#    {% block extrahead %}#}
+    {#        <link rel="icon" href="{% static 'favicon.ico' %}" />#}
+    {#    {% endblock %}#}
+
+
+     {% block branding %}
+         <img src="{% static 'favicon.ico' %}" alt="logo" style="float: left; padding-right: 5%;">
+
+            <h1 id="site-name" >
+                <a href="{% url 'admin:index' %}">{{"Панель администрирования AlfaFood"|default:_('Django administration') }}
+                </a>
+            </h1>
+{#         {{ block.super }}#}
+     {% endblock %}
+
+    {% block title %}{{ title }} | {{ "AlfaFood"|default:_('Django site admin') }}{% endblock %}
