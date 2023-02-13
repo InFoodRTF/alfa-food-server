@@ -1,6 +1,11 @@
+import sys
 from datetime import date
+from io import BytesIO
 
+from PIL import Image
 from django.contrib.auth.models import User
+from django.core.files import File
+from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
 
 # Create your models here.
@@ -37,6 +42,51 @@ class Product(models.Model):
             url = ''
         return url
 
+    # def save(self):
+    #     # Opening the uploaded image
+    #     im = Image.open(self.image)
+    #
+    #     output = BytesIO()
+    #
+    #     original_width, original_height = im.size
+    #     # aspect_ratio = round(original_width / original_height)
+    #     # desired_height = 100  # Edit to add your desired height in pixels
+    #     # desired_width = desired_height * aspect_ratio
+    #
+    #     # Resize/modify the image
+    #     im = im.resize((original_width, original_height))
+    #
+    #     # after modifications, save it to the output
+    #     im.save(output, format='JPEG', quality=90)
+    #     output.seek(0)
+    #
+    #     # change the imagefield value to be the newley modifed image value
+    #     self.image = InMemoryUploadedFile(output, 'ImageField', "%s.jpg" % self.image.name.split('.')[0], 'image/jpeg',
+    #                                       sys.getsizeof(output), None)
+    #
+    #     super(Product, self).save()
+
+    # def save(self):
+    #     # if not self.id:
+    #     #     self.image = self.compress_image(self.image)
+    #
+    #     #self.image = self.compress_image(self.image)
+    #
+    #     super(Product, self).save()
+
+    # @staticmethod
+    # def compress_image(image):
+    #     img = Image.open(image).quantize(colors=256, method=Image.FASTOCTREE)#.convert("RGB")
+    #     im_io = BytesIO()
+    #
+    #     if image.name.split('.')[1] == 'jpeg' or image.name.split('.')[1] == 'jpg':
+    #         img.save(im_io, format='jpeg', optimize=True, quality=90)
+    #         new_image = File(im_io, name="%s.jpeg" % image.name.split('.')[0], )
+    #     else:
+    #         img.save(im_io, format='png', optimize=True, quality=90)
+    #         new_image = File(im_io, name="%s.png" % image.name.split('.')[0], )
+    #
+    #     return new_image
 
 class Order(models.Model):
     class Meta:

@@ -6,6 +6,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -23,10 +24,8 @@ from orders.serializers import OrderSerializer, OrderItemSerializer, ProductSeri
 from common.services import all_objects, filter_objects, create_objects
 from orders.services import create_order_items
 
-
 # Create your views here.
 from classes.models import Grade
-
 
 
 class MyOwnView(APIView):
@@ -60,7 +59,8 @@ class MyOwnView(APIView):
 
                 temp_dict_3 = {}
                 for order_item in orders_item_in__orders:
-                    temp_dict_3[order_item.product.name] = int(temp_dict_3.get(order_item.product.name) or 0) + order_item.quantity
+                    temp_dict_3[order_item.product.name] = int(
+                        temp_dict_3.get(order_item.product.name) or 0) + order_item.quantity
 
                 for product, quantity in temp_dict_3.items():
                     temp_dict_2['order_items'].append({'product': product,
@@ -77,9 +77,17 @@ class MyOwnView(APIView):
         return Response(result)
 
 
+# region Pagination
+class OrderPagination(LimitOffsetPagination):
+    def get_paginated_response(self, data):
+        return Response(data, headers={'Orders-Total-Count': self.count})
+
+
+# endregion
+
 class OrderViewSet(ModelViewSet):
     def get_object(self):
-        queryset = self.get_queryset()
+        # queryset = self.get_queryset()
 
         obj = get_object_or_404(Order, pk=int(self.kwargs.get('pk')))
         # self.check_object_permissions(self.request, obj)
@@ -112,9 +120,6 @@ class OrderViewSet(ModelViewSet):
                 #         queryset = orders_meal_category
             return queryset
 
-
-
-
         if hasattr(user, "parent"):
             return Order.objects.filter(parent_id=user.parent.id)
 
@@ -140,13 +145,12 @@ class OrderViewSet(ModelViewSet):
     #     kwargs.setdefault('context', self.get_serializer_context())
     #     return serializer_class(*args, **kwargs)
 
-
     def create(self, request, *args, **kwargs):
         user = request.user
 
         try:
             if isinstance(user.parent, Parent):
-               pass
+                pass
         except:
             return Response({'detail': 'User must be Parent'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -200,20 +204,19 @@ class OrderViewSet(ModelViewSet):
             return Response({'detail': 'The product ID was not provided or incorrectly request'},
                             status=status.HTTP_400_BAD_REQUEST)
 
-
         serializer = OrderSerializer(order, many=False)
         return Response(serializer.data)
 
     serializer_class = OrderSerializer
+    pagination_class = OrderPagination
 
     permission_classes = [
         IsOwnerOrStaff,
     ]
 
-    @action(detail=False, methods=['GET'])
+    @action(detail=False, methods=['GET'])  # TODO: Удалить/Изменить
     def id(self, request):
         return Response(self.get_queryset().values_list("id", flat=True))
-
 
         # order = create_objects(Order.objects, user_id=user)
         # order_items = []
@@ -234,8 +237,6 @@ class OrderViewSet(ModelViewSet):
         # return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
-
-
 class OrderItemViewSet(ModelViewSet):
     queryset = all_objects(OrderItem.objects)
     serializer_class = OrderItemSerializer
@@ -250,3 +251,16 @@ class ProductViewSet(ModelViewSet):
     ordering_fields = ['price', ]
     # all_orders = Order.objects.all()
     # serializer = OrderSerializer(all_orders, many=True)
+
+    @action(detail=True, methods=['GET'])  # TODO: Удалить/Изменить
+    def info(self, request, pk=None):
+        # return Response(self.get_queryset().values_list("id", flat=True))
+        product = get_object_or_404(Product, pk=pk)
+        return Response(product.description)
+
+    @action(detail=True, methods=['GET'])  # TODO: Удалить/Изменить
+    def with_info(self, request, pk=None):
+        # return Response(self.get_queryset().values_list("id", flat=True))
+        product = get_object_or_404(Product, pk=pk)
+        # return Response(ProductSerializer.to_representation(ProductSerializer(product), product))
+        return Response(ProductSerializer(product).data)
