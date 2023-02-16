@@ -19,7 +19,8 @@ from orders.models import Order, OrderItem, Product
 from classes.models import MealCategory
 
 from orders.permissons import IsOwnerOrStaff
-from orders.serializers import OrderSerializer, OrderItemSerializer, ProductSerializer, OrderCanteenSerializer
+from orders.serializers import OrderSerializer, OrderItemSerializer, ProductSerializer, OrderCanteenSerializer, \
+    OrderParentSerializer
 
 from common.services import all_objects, filter_objects, create_objects
 from orders.services import create_order_items
@@ -66,7 +67,7 @@ class MyOwnView(APIView):
                     temp_dict_2['order_items'].append({'product': product,
                                                        'quantity': quantity})
 
-                temp_dict[meal_category.category_name].append({grade.grade: temp_dict_2})
+                temp_dict[meal_category.category_name].append({grade.name: temp_dict_2})
 
                 # students_order = Student.objects.filter(order__in=orders_meal_category)
 
@@ -213,6 +214,11 @@ class OrderViewSet(ModelViewSet):
     permission_classes = [
         IsOwnerOrStaff,
     ]
+
+    def get_serializer_class(self, *args, **kwargs):
+        if hasattr(self.request.user, 'parent'):
+            return OrderParentSerializer
+        return OrderSerializer
 
     @action(detail=False, methods=['GET'])  # TODO: Удалить/Изменить
     def id(self, request):
