@@ -42,8 +42,8 @@ class Grade(models.Model):
         verbose_name = "Класс"
         verbose_name_plural = "Классы"
 
-    grade = models.CharField(max_length=6, unique=True, verbose_name="Класс")
-    teacher = models.ForeignKey(Teacher, on_delete=models.RESTRICT, default=5, verbose_name="Учитель класса")
+    name = models.CharField(max_length=6, unique=True, verbose_name="Класс")
+    teacher = models.ForeignKey(Teacher, on_delete=models.RESTRICT, verbose_name="Учитель класса")
     shift = models.PositiveSmallIntegerField(
         choices=ShiftChoice.choices,
         default=ShiftChoice.FIRST,
@@ -52,7 +52,7 @@ class Grade(models.Model):
     meal_time = models.ManyToManyField(MealTime, verbose_name="Время приёма пищи")
 
     def __str__(self):
-        return f"{self.grade} (ID: {self.id})"
+        return f"{self.name} (ID: {self.id})"
 
 
 class Student(models.Model):
@@ -66,7 +66,7 @@ class Student(models.Model):
     middle_name = models.CharField(max_length=150, blank=True)
 
     grade = models.ForeignKey(Grade, null=True, on_delete=models.RESTRICT, verbose_name="Класс ученика")
-    # Сделай выборку классов, типо не "7 Г", а чтоб было grade.nums/grade.letters
+    #TODO Сделай выборку классов, типо не "7 Г", а чтоб было grade.nums/grade.letters
 
     parent_id = models.ForeignKey(Parent, on_delete=models.RESTRICT, verbose_name="Идентификатор родителя")
     # teacher_id = models.ForeignKey(Teacher, on_delete=models.RESTRICT, verbose_name="Идентификатор учителя")

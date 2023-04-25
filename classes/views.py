@@ -13,7 +13,8 @@ from rest_framework.viewsets import ModelViewSet
 
 from accounts.models import Parent, Teacher
 from classes.models import Student, Attendance, Grade, AttendanceChoice, MealCategory
-from classes.serializers import StudentSerializer, AttendanceSerializer, GradeSerializer
+from classes.serializers import StudentSerializer, AttendanceSerializer, GradeSerializer, StudentParentSerializer, \
+    GradeParentSerializer
 from common.services import all_objects, filter_objects, create_objects
 from orders.models import Order
 
@@ -23,7 +24,7 @@ from orders.models import Order
 class StudentViewSet(ModelViewSet):
     def get_queryset(self):
         """
-        This view should return a list of all the purchases
+        This view should return a list of all students
         for the currently authenticated user.
         """
         user = self.request.user
@@ -38,15 +39,24 @@ class StudentViewSet(ModelViewSet):
             teacher_grades = filter_objects(Grade.objects, teacher=user.teacher.id)
             return filter_objects(Student.objects, grade__in=teacher_grades)
 
-    serializer_class = StudentSerializer
+    # serializer_class = StudentSerializer
 
     permission_classes = (IsAuthenticated, )
 
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['grade']
 
+    def get_serializer_class(self, *args, **kwargs):
+        if hasattr(self.request.user, 'parent'):
+            return StudentParentSerializer
+        return StudentSerializer
+
 
 class AttendanceViewSet(ModelViewSet):
+
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['grade', 'date', '']
+
     def get_object(self):
         """
         Returns the object the view is displaying.
@@ -115,20 +125,20 @@ class AttendanceViewSet(ModelViewSet):
         if self.action == "partial_update":
             return Attendance.objects.all()
 
-        data_grade_id = self.request.data.get('grade')
+        data_grade_id = self.request.query_params.get('grade')
 
         if data_grade_id is None:
             raise ValidationError({'detail': 'Grade was not provided'})
 
-        grade = Grade.objects.get(id=data_grade_id)  #
+        grade = Grade.objects.get(name=data_grade_id)  #
 
         try:
-            attendance_date = self.request.data['date']
+            attendance_date = self.request.query_params.get['date']
             datetime.datetime.strptime(attendance_date, '%Y-%m-%d')
         except:
             raise ValidationError({'detail': "Date was not provided or incorrect data format, should be YYYY-MM-DD"})
 
-        meal_category = self.request.data.get('meal_category')
+        meal_category = self.request.query_params.get('meal_category')
 
         if meal_category is None:
             raise ValidationError({'detail': 'Meal category was not provided'})
@@ -216,27 +226,48 @@ class AttendanceViewSet(ModelViewSet):
 
 
 class GradeViewSet(ModelViewSet):
+    def get_object(self):
+        # queryset = self.get_queryset()
+
+        obj = get_object_or_404(Grade, pk=int(self.kwargs.get('pk')))
+        # self.check_object_permissions(self.request, obj)
+        return obj
+
+    def retrieve(self, request, *args, **kwargs):
+        queryset = Grade.objects.all()
+        user = get_object_or_404(queryset, name=self.kwargs.get('pk'))
+        serializer = GradeParentSerializer(user)
+        return Response(serializer.data)
+
     def get_queryset(self):
-        """
-        This view should return a list of all the purchases
-        for the currently authenticated user.
-        """
         user = self.request.user
 
-        if user.is_staff:
-            return all_objects(Grade.objects)
+        if hasattr(user, 'teacher'):
+            return Grade.objects.filter(teacher=user.teacher.id)
+        elif hasattr(user, 'parent'):
+            parent_students = Student.objects.filter(parent_id=user.parent.id)
+            grade_names = set([student.grade.name for student in parent_students])
+            return Grade.objects.filter(name__in=grade_names)
 
-        try:
-            if isinstance(user.teacher, Teacher):
-                return Grade.objects.filter(teacher=user.teacher.id)
-        except:
-            pass
+        # if user.is_staff:
+        #     return all_objects(Grade.objects)
+        #
+        # try:
+        #     if isinstance(user.teacher, Teacher):
+        #         return Grade.objects.filter(teacher=user.teacher.id)
+        # except:
+        #     pass
 
 
 
-    serializer_class = GradeSerializer
+    # serializer_class = GradeSerializer
 
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['id']
+    filterset_fields = ['name', ]
+
+    def get_serializer_class(self, *args, **kwargs):
+        if hasattr(self.request.user, 'parent'):
+            return GradeParentSerializer
+        return GradeSerializer
 
 

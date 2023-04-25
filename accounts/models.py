@@ -4,6 +4,8 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 
+
+
 # Create your models here.
 class Profile(models.Model):
     class Meta:
@@ -53,7 +55,10 @@ class Teacher(models.Model):
     user = models.OneToOneField(User,  on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.user}"
+        return f"{self.user} / ID: {self.id}"
+
+    def get_full_name(self):
+        return f"{self.user.last_name} {self.user.first_name} {self.user.profile.middle_name}".strip()
 
 
 class CanteenEmployee(models.Model):
