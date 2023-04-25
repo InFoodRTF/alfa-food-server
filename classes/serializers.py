@@ -8,7 +8,7 @@ from classes.models import Student, Attendance, Grade, AttendanceChoice, MealTim
 class StudentParentSerializer(ModelSerializer):
     class Meta:
         model = Student
-        exclude = ['parent_id', 'id']
+        exclude = ['parent_id',]
 
     def to_representation(self, instance):
         # TODO: Используй то что ниже, для вывода (возможно в абстрактный класс, чтобы все работало везде)
@@ -53,6 +53,7 @@ class GradeParentSerializer(ModelSerializer):
         rep['teacher'] = Teacher.objects.get(id=rep['teacher']).get_full_name()
         rep['meal_time'] = MealTimeSerializer(many=True).to_representation(instance.meal_time)
         return rep
+
 
 class GradeSerializer(ModelSerializer):
     class Meta:

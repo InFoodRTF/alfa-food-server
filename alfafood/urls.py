@@ -20,7 +20,7 @@ from rest_framework.routers import SimpleRouter
 from accounts.views import UserAPIView
 from alfafood import settings
 from classes.views import StudentViewSet, AttendanceViewSet, GradeViewSet
-from orders.views import OrderViewSet, OrderItemViewSet, ProductViewSet, MyOwnView
+from orders.views import OrderViewSet, OrderItemViewSet, ProductViewSet, MyOwnView, MenuViewSet, CartViewSet
 
 from django.conf.urls.static import static
 
@@ -34,6 +34,10 @@ router.register(r'students', StudentViewSet, basename="Student")
 
 router.register(r'attendance', AttendanceViewSet, basename="Attendance")
 router.register(r'grades', GradeViewSet, basename="Grade")
+router.register(r'menu', MenuViewSet, basename="Menu")
+
+# To CART urls
+router.register(r'cart', CartViewSet, basename="Cart")
 
 
 

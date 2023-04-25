@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'knox',
     'corsheaders',
     'django_filters',
+    'rangefilter',
 
     'accounts',
     'orders',

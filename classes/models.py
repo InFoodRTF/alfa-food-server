@@ -66,7 +66,7 @@ class Student(models.Model):
     middle_name = models.CharField(max_length=150, blank=True)
 
     grade = models.ForeignKey(Grade, null=True, on_delete=models.RESTRICT, verbose_name="Класс ученика")
-    # Сделай выборку классов, типо не "7 Г", а чтоб было grade.nums/grade.letters
+    #TODO Сделай выборку классов, типо не "7 Г", а чтоб было grade.nums/grade.letters
 
     parent_id = models.ForeignKey(Parent, on_delete=models.RESTRICT, verbose_name="Идентификатор родителя")
     # teacher_id = models.ForeignKey(Teacher, on_delete=models.RESTRICT, verbose_name="Идентификатор учителя")
