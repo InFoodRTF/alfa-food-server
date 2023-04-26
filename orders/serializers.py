@@ -252,6 +252,7 @@ class CartSerializer(ModelSerializer):
         # if hasattr(self.context['request'].user, "parent"):
         #     [rep.pop(item) for item in ['id', 'customer']]
 
+        rep['menu_date_implementation'] = Menu.objects.get(pk=rep['menu']).date_implementation
         return rep
 
     # def to_representation(self, instance):
