@@ -203,7 +203,7 @@ class MenuParentSerializer(ModelSerializer):
 class CartItemSerializer(ModelSerializer):
     class Meta:
         model = CartItem
-        exclude = ['cart', 'id']
+        exclude = ['cart',]
 
     def to_representation(self, instance):
         rep = super(CartItemSerializer, self).to_representation(instance)
@@ -214,7 +214,7 @@ class CartItemSerializer(ModelSerializer):
         # TODO: Требует изменения или доработки
         # if hasattr(self.context['request'].user, "parent"):
         #     [product_serialized.pop(item) for item in ['id', 'created', 'updated', 'description']]
-        rep.update(id=menu_item.id, product=product_serialized)
+        rep.update(product=product_serialized)
         return rep
 
 

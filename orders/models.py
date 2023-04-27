@@ -232,6 +232,12 @@ class Cart(models.Model):
     cart_items = models.ManyToManyField(
         MenuItem, through='CartItem', through_fields=('cart', 'product'))
 
+    def delete_all_cart_item(self):
+        self.cart_items.through.objects.all().delete()  # Получаю все many_to_many objects (CartItem)
+        # for item in self.cart_items.all():
+        #     cart_item = CartItem.objects.get(cart=self, product=item)
+        #     cart_item.delete()
+
     def __str__(self) -> str:
         return f'Корзина {self.customer.get_full_name()}'
 

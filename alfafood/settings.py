@@ -106,7 +106,8 @@ DATABASES = {
     'USER': config.DB_USER,
     'PASSWORD': config.DB_PASSWORD,
     'HOST': config.DB_HOST,
-    'PORT': config.DB_PORT
+    'PORT': config.DB_PORT,
+    'TIME_ZONE': config.DB_TIME_ZONE
   }
 }
 
@@ -163,5 +164,5 @@ REST_FRAMEWORK = {
     'knox.auth.TokenAuthentication',
   ],
   'DATETIME_FORMAT':
-  "%d/%m/%Y %H:%M:%S",
+  "%d.%m.%Y %H:%M:%S",
 }

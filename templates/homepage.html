@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8">
+    <title>AlfaFood</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/css/bootstrap.min.css">
+    <style>
+      /* красный цвет для заголовка */
+      h1 {
+        color: red;
+      }
+
+      /* фоновые изображения */
+      body {
+        background-image: url('https://images.unsplash.com/photo-1612362301429-9a2afda2ed61');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+      }
+
+            /* повернутые изображения */
+      .food1 {
+        position: absolute;
+          width: 20%;
+        bottom: 50%;
+        left: 1%;
+        transform: rotate(-10deg);
+        z-index: -1;
+      }
+
+      .food2 {
+        position: absolute;
+          width: 20%;
+        bottom: 30%;
+        right: 0;
+        transform: rotate(20deg);
+        z-index: -1;
+      }
+
+      .food3 {
+        position: absolute;
+          width: 30%;
+        bottom: 20%;
+        left: 40%;
+        transform: rotate(-5deg);
+        z-index: -1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container text-center fs-4">
+      <h1>AlfaFood</h1>
+      <p>Добро пожаловать на сайт-заглушка проекта AlfaFood!</p>
+      <p>Мне кажется немного странным, но, по моему, вас тут быть не должно o_0</p>
+    </div>
+    <!-- фоновые изображения с блюдами -->
+    {% load static %}
+    <img src="{{ STATIC_URL }}/static/homepage/1.png" alt="Блюдо 1" class="food1">
+    <img src="{{ STATIC_URL }}/static/homepage/2.png" alt="Блюдо 2" class="food2">
+    <img src="{{ STATIC_URL }}/static/homepage/3.png" alt="Блюдо 3" class="food3">
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

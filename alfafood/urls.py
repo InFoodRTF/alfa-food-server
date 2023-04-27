@@ -14,7 +14,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.shortcuts import render
 from django.urls import path, include
+from django.views import View
 from rest_framework.routers import SimpleRouter
 
 from accounts.views import UserAPIView
@@ -39,9 +41,14 @@ router.register(r'menu', MenuViewSet, basename="Menu")
 # To CART urls
 router.register(r'cart', CartViewSet, basename="Cart")
 
+class HomepageView(View):
+    '''вывод данных профессий'''
 
+    def get(self, request):
+        return render(request, 'homepage.html')
 
 urlpatterns = [
+    path('', HomepageView.as_view(), name='homepage'),
     path('admin/', admin.site.urls),
     path('user/', UserAPIView.as_view()),
     path('auth/', include('accounts.urls')),

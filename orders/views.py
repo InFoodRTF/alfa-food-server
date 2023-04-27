@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from time import strptime
 
 from django.db import transaction
@@ -336,17 +336,62 @@ class CartViewSet(ModelViewSet): # TODO: Чекни реализацию кор�
 
     def list(self, request, *args, **kwargs):  # Переопределил вывод GET ModelViewSet
 
-        if request.user.is_staff:
+        user = request.user
+
+        if user.is_staff:
             queryset = self.get_queryset()
             serializer = self.get_serializer(queryset, many=True)
-            return Response(serializer.data)
 
-        try:
+        # try:
+        #     instance = self.get_object()
+        # except (Cart.DoesNotExist, KeyError):
+        #     return Response({"error": "Requested Cart does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
+        if isinstance(user.parent, Parent):
             instance = self.get_object()
-        except (Cart.DoesNotExist, KeyError):
-            return Response({"error": "Requested Cart does not exist"}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = self.get_serializer(instance)
+            if request.query_params:
+                menu_date = request.query_params.get('menu_date')
+                student_id = request.query_params.get('student_id')
+
+                if menu_date:
+                    if datetime.strptime(menu_date, "%Y-%m-%d").date() < datetime.today().date():
+                        return Response({'detail': 'Выбранная дата предшествует текущей'},
+                                        status=status.HTTP_400_BAD_REQUEST)
+
+                    menu = get_object_or_404(Menu, date_implementation=menu_date, active=True)
+
+                    if instance.menu != menu:
+                        instance.delete_all_cart_item()
+                        instance.menu = menu
+                        instance.save()
+
+                if student_id:
+                    student = get_object_or_404(Student, pk=int(student_id), parent_id=user.parent)
+
+                    if instance.student != student:
+                        instance.delete_all_cart_item()
+                        instance.student = student
+                        instance.save()
+
+            # Проверка на то, что корзина точно будет иметь корректное меню. Иначе -- None.
+            instance_menu_date = instance.menu.date_implementation
+            if instance_menu_date < datetime.today().date():
+
+                future_menu = Menu.objects.filter(date_implementation__gte=instance_menu_date, active=True) \
+                    .order_by('date_implementation').first()
+
+                if future_menu is not None:
+                    instance.menu = future_menu
+                else:
+                    instance.menu = None
+
+                instance.save()
+            # Сериализуем полностью прошедший проверку instance (cart)
+            serializer = self.get_serializer(instance)
+        else:
+            serializer = self.get_serializer(self.get_queryset(), many=True)
+
         return Response(serializer.data)
 
     def get_queryset(self):
@@ -368,19 +413,19 @@ class CartViewSet(ModelViewSet): # TODO: Чекни реализацию кор�
     @action(detail=False, methods=['post'])
     def add(self, request, pk=None):
         cart = self.get_object()
-        product_id = request.data.get("product_id")
+        menuitem_id = request.data.get("menuitem_id")
 
-        if not product_id:
+        if not menuitem_id:
             return Response({"error": "Item ID not provided."}, status=status.HTTP_400_BAD_REQUEST)
 
-        menu_item = MenuItem.objects.filter(pk=product_id).first()
+        menu_item = MenuItem.objects.filter(pk=menuitem_id).first()
         if menu_item is None:
             return Response({"error": "The provided Product ID does not exist."})
 
         if cart.menu != menu_item.menu:
             return Response({"error": "The provided product is not in the menu"})
 
-        cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product_id)
+        cart_item, created = CartItem.objects.get_or_create(cart=cart, product=menu_item)
 
         if not created:
             cart_item.quantity += 1
@@ -392,13 +437,13 @@ class CartViewSet(ModelViewSet): # TODO: Чекни реализацию кор�
     @action(detail=False, methods=['post', 'delete'])
     def remove(self, request, pk=None):
         cart = self.get_object()
-        product_id = request.data.get("product_id")
+        menuitem_id = request.data.get("menuitem_id")
 
-        if not product_id:
+        if not menuitem_id:
             return Response({"error": "Item ID not provided."}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            cart_item = CartItem.objects.get(cart=cart, product=product_id)
+            cart_item = CartItem.objects.get(cart=cart, product=menuitem_id)
         except CartItem.DoesNotExist:
             return Response({"error": "Item not found in cart."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -416,8 +461,29 @@ class CartViewSet(ModelViewSet): # TODO: Чекни реализацию кор�
         serializer = CartSerializer(cart)
         return Response(serializer.data)
 
+    @action(detail=False, methods=['post'])
+    def reset(self, request, pk=None):
+        '''Сбрасывает состояние корзины, кроме выбранного ребёнка'''
+        cart = self.get_object()
+
+        cart.delete_all_cart_item()
+
+        target_date = cart.menu.date_implementation
+
+        future_menu = Menu.objects.filter(date_implementation__gte=target_date, active=True)\
+            .order_by('date_implementation').first()
+
+        if future_menu is not None:
+            cart.menu = future_menu
+            cart.save()
+        else:
+            Response({'detail': 'Корзина была очищена, но сейчас нет активных меню.'})
+
+        serializer = CartSerializer(cart)
+        return Response(serializer.data)
+
     @action(detail=False, methods=['post'], url_path='create-order')
-    def create_order(self, request, pk=None): # TODO: quantity MenuItem изменять
+    def create_order(self, request, pk=None):
         user = self.request.user
         if hasattr(user, "parent"):
             cart = self.get_object()
@@ -428,6 +494,11 @@ class CartViewSet(ModelViewSet): # TODO: Чекни реализацию кор�
 
             student = cart.student
             order_date = cart.menu.date_implementation
+
+            if order_date < datetime.today().date():
+                return Response({'detail': 'Невозможно оформить заказ. Выбранная дата предшествует текущей'},
+                                status=status.HTTP_400_BAD_REQUEST)
+
             # order_date = request.data.get("order_date")
             order_data = {
                 'parent_id': parent.id,
@@ -441,7 +512,9 @@ class CartViewSet(ModelViewSet): # TODO: Чекни реализацию кор�
                 cart_items = CartItem.objects.filter(cart=cart)
                 for cart_item in cart_items:
 
-                    menu_item = MenuItem.objects.get(pk=cart_item.product) # TODO:Сделать сообщение о том, что закончился товар
+                    # menu_item = MenuItem.objects.get(pk=cart_item.product) # TODO:Сделать сообщение о том, что закончился товар
+                    menu_item = cart_item.product
+
                     if menu_item.quantity > 1:
                         menu_item.quantity -= cart_item.quantity # TODO: сейчас вообще может уйти в минус
                         menu_item.save()
