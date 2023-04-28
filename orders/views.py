@@ -25,10 +25,10 @@ from classes.models import MealCategory
 
 from orders.permissons import IsOwnerOrStaff
 from orders.serializers import OrderSerializer, OrderItemSerializer, ProductSerializer, OrderCanteenSerializer, \
-    OrderParentSerializer, MenuSerializer, MenuParentSerializer, CartSerializer
+    OrderParentSerializer, MenuSerializer, CartSerializer
 
 from common.services import all_objects, filter_objects, create_objects
-from orders.services import create_order_items
+from orders.services import create_order_items, date_format_validate
 
 # Create your views here.
 from classes.models import Grade
@@ -43,7 +43,7 @@ class MyOwnView(APIView):
         result = {'meal_category': []}
 
         order_date = request.data.get('date')
-        if order_date is None:
+        if order_date is None: # TODO: Переделать, метод date_format_validate
             return Response({"detail": "Date was not provided or incorrect data format, should be YYYY-MM-DD"})
 
         for meal_category in MealCategory.objects.all():
@@ -318,19 +318,22 @@ class MenuViewSet(ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if isinstance(user.parent, Parent):
+
             menu_date = self.request.query_params.get('date')
 
             if menu_date is None:
                 raise ValidationError(detail='Дата не была предоставлена')
 
-            return Menu.objects.get_active_objects(date_implementation=menu_date)
+            valid_menu_date = date_format_validate(menu_date)
+
+            return Menu.objects.get_active_objects(date_implementation=valid_menu_date)
             # obj = Menu.objects.get(active=True)
             # return obj
         else:
             return all_objects(Menu.objects)
 
 
-class CartViewSet(ModelViewSet): # TODO: Чекни реализацию корзины в деливери
+class CartViewSet(ModelViewSet):
     queryset = all_objects(Cart.objects)
     serializer_class = CartSerializer
 
@@ -355,11 +358,13 @@ class CartViewSet(ModelViewSet): # TODO: Чекни реализацию кор�
                 student_id = request.query_params.get('student_id')
 
                 if menu_date:
-                    if datetime.strptime(menu_date, "%Y-%m-%d").date() < datetime.today().date():
-                        return Response({'detail': 'Выбранная дата предшествует текущей'},
+                    valid_menu_date = date_format_validate(menu_date)
+
+                    if valid_menu_date.date() < datetime.today().date():
+                        return Response({'detail': f"Выбранная дата '{valid_menu_date}' предшествует текущей"},
                                         status=status.HTTP_400_BAD_REQUEST)
 
-                    menu = get_object_or_404(Menu, date_implementation=menu_date, active=True)
+                    menu = get_object_or_404(Menu, date_implementation=valid_menu_date, active=True)
 
                     if instance.menu != menu:
                         instance.delete_all_cart_item()

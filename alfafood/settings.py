@@ -138,7 +138,7 @@ LANGUAGE_CODE = 'ru-RU'
 TIME_ZONE = 'Asia/Yekaterinburg'
 
 USE_I18N = True
-
+# USE_L10N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
@@ -165,4 +165,7 @@ REST_FRAMEWORK = {
   ],
   'DATETIME_FORMAT':
   "%d.%m.%Y %H:%M:%S",
+  'DATE_FORMAT':
+  "%d.%m.%Y",
+  'DATE_INPUT_FORMATS': ['%d-%m-%Y'],
 }

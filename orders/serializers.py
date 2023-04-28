@@ -10,15 +10,15 @@ from orders.models import Order, OrderItem, Product, Menu, MenuItem, Cart, CartI
 from classes.models import MealCategory, Grade
 
 
-class ProductOrderSerializer(ModelSerializer):
-    class Meta:
-        model = Product
-        # fields = '__all__'
-        exclude = ['id', 'description', 'meal_category']
-
-    def to_representation(self, instance):
-        rep = super(ProductOrderSerializer, self).to_representation(instance)
-        return rep
+# class ProductOrderSerializer(ModelSerializer):
+#     class Meta:
+#         model = Product
+#         # fields = '__all__'
+#         exclude = ['id', 'description', 'meal_category']
+#
+#     def to_representation(self, instance):
+#         rep = super(ProductOrderSerializer, self).to_representation(instance)
+#         return rep
 
 
 class ProductSerializer(ModelSerializer):
@@ -165,32 +165,32 @@ class MenuSerializer(ModelSerializer):
         exclude = ['id', ]
 
 
-class MenuItemParentSerializer(ModelSerializer):
-    class Meta:
-        model = MenuItem
-        exclude = ['id', 'menu', ]
+# class MenuItemParentSerializer(ModelSerializer):
+#     class Meta:
+#         model = MenuItem
+#         exclude = ['id', 'menu', ]
+#
+#     def to_representation(self, instance):
+#         rep = super(MenuItemParentSerializer, self).to_representation(instance)
+#         # TODO:Сделай продукт красивее
+#         # rep['product_id'] = ProductSerializer().to_representation(Product.objects.get(pk=rep['product_id']))
+#         return rep
 
-    def to_representation(self, instance):
-        rep = super(MenuItemParentSerializer, self).to_representation(instance)
-        # TODO:Сделай продукт красивее
-        # rep['product_id'] = ProductSerializer().to_representation(Product.objects.get(pk=rep['product_id']))
-        return rep
 
-
-class MenuParentSerializer(ModelSerializer):
-    menu_items = MenuItemParentSerializer(many=True, source="menu_set")
-
-    class Meta:
-        model = Menu
-        exclude = ['id', ] # 'active', 'date_added', 'date_implementation'
-
-    def to_representation(self, instance):
-        rep = super(MenuParentSerializer, self).to_representation(instance)
-
-        # menu_items = [item for meal_category in MealCategory.objects.all() for item in
-        #               MenuItemParentSerializer.to_representation(MenuItem.objects.filter(meal_category=meal_category))]
-
-        return rep
+# class MenuParentSerializer(ModelSerializer):
+#     menu_items = MenuItemParentSerializer(many=True, source="menu_set")
+#
+#     class Meta:
+#         model = Menu
+#         exclude = ['id', ] # 'active', 'date_added', 'date_implementation'
+#
+#     def to_representation(self, instance):
+#         rep = super(MenuParentSerializer, self).to_representation(instance)
+#
+#         # menu_items = [item for meal_category in MealCategory.objects.all() for item in
+#         #               MenuItemParentSerializer.to_representation(MenuItem.objects.filter(meal_category=meal_category))]
+#
+#         return rep
 
     # def to_representation(self, instance):
     #     iterable = instance.all() if isinstance(instance, Manager) else instance
