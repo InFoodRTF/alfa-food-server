@@ -230,7 +230,7 @@ class Cart(models.Model):
                              verbose_name='Меню корзины', related_name='cart_menu')
 
     cart_items = models.ManyToManyField(
-        MenuItem, through='CartItem', through_fields=('cart', 'product'))
+        MenuItem, through='CartItem', through_fields=('cart', 'menu_item'))
 
     def delete_all_cart_item(self):
         self.cart_items.through.objects.all().delete()  # Получаю все many_to_many objects (CartItem)
@@ -254,14 +254,14 @@ class CartItem(models.Model):
         verbose_name_plural = 'Продукты в корзине'
 
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, verbose_name='Корзина', related_name='user_cart')
-    product = models.ForeignKey(MenuItem, on_delete=models.CASCADE, verbose_name='Продукт из меню')
+    menu_item = models.ForeignKey(MenuItem, on_delete=models.CASCADE, verbose_name='Продукт из меню')
     quantity = models.PositiveIntegerField('Количество', default=1,
                                            validators=[MaxValueValidator(10,
                                                                          'В корзину допустимо добавить только 10 единиц одного товара.'),
                                                        MinValueValidator(1, 'Значение не должно быть меньше единицы.')])
 
     def __str__(self) -> str:
-        return f'В корзине покупателя {self.cart.customer} находится товар {self.product} (x{self.quantity})'
+        return f'В корзине покупателя {self.cart.customer} находится товар {self.menu_item} (x{self.quantity})'
 
 
 class Order(models.Model):

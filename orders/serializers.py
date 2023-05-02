@@ -201,21 +201,23 @@ class MenuSerializer(ModelSerializer):
 
 
 class CartItemSerializer(ModelSerializer):
+    menu_item = MenuItemSerializer()
+
     class Meta:
         model = CartItem
         exclude = ['cart',]
 
-    def to_representation(self, instance):
-        rep = super(CartItemSerializer, self).to_representation(instance)
-        menu_item = MenuItem.objects.get(pk=rep['product'])
-        product_serialized = ProductSerializer(menu_item.product).data
-
-        # Приведение к ответу для конкртеного типа юзеров
-        # TODO: Требует изменения или доработки
-        # if hasattr(self.context['request'].user, "parent"):
-        #     [product_serialized.pop(item) for item in ['id', 'created', 'updated', 'description']]
-        rep.update(product=product_serialized)
-        return rep
+    # def to_representation(self, instance):
+    #     rep = super(CartItemSerializer, self).to_representation(instance)
+    #     menu_item = MenuItem.objects.get(pk=rep['product'])
+    #     product_serialized = ProductSerializer(menu_item.product).data
+    #
+    #     # Приведение к ответу для конкртеного типа юзеров
+    #     # TODO: Требует изменения или доработки
+    #     # if hasattr(self.context['request'].user, "parent"):
+    #     #     [product_serialized.pop(item) for item in ['id', 'created', 'updated', 'description']]
+    #     # rep.update(product=product_serialized)
+    #     return rep
 
 
 class CartSerializer(ModelSerializer):
@@ -252,7 +254,7 @@ class CartSerializer(ModelSerializer):
         # if hasattr(self.context['request'].user, "parent"):
         #     [rep.pop(item) for item in ['id', 'customer']]
 
-        rep['menu_date_implementation'] = Menu.objects.get(pk=rep['menu']).date_implementation
+        rep['menu_date_implementation'] = Menu.objects.get(pk=rep['menu']).date_implementation.strftime("%d.%m.%Y")
         return rep
 
     # def to_representation(self, instance):
