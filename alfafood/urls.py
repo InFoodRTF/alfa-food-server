@@ -14,15 +14,21 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.shortcuts import render
 from django.urls import path, include
+from django.views import View
 from rest_framework.routers import SimpleRouter
 
 from accounts.views import UserAPIView
 from alfafood import settings
 from classes.views import StudentViewSet, AttendanceViewSet, GradeViewSet
-from orders.views import OrderViewSet, OrderItemViewSet, ProductViewSet, MyOwnView, MenuViewSet, CartViewSet
 
 from django.conf.urls.static import static
+
+from orders.views.cart import CartViewSet
+from orders.views.menu import MenuViewSet
+from orders.views.order import OrderViewSet, OrderItemViewSet
+from orders.views.product import ProductViewSet
 
 router = SimpleRouter()
 
@@ -39,13 +45,18 @@ router.register(r'menu', MenuViewSet, basename="Menu")
 # To CART urls
 router.register(r'cart', CartViewSet, basename="Cart")
 
+class HomepageView(View):
+    '''вывод данных профессий'''
 
+    def get(self, request):
+        return render(request, 'homepage.html')
 
 urlpatterns = [
+    path('', HomepageView.as_view(), name='homepage'),
     path('admin/', admin.site.urls),
     path('user/', UserAPIView.as_view()),
     path('auth/', include('accounts.urls')),
-    path('canteen/', MyOwnView.as_view())
+    # path('canteen/', MyOwnView.as_view())
 ]
 
 urlpatterns += router.urls

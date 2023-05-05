@@ -7,8 +7,14 @@ from django.forms import CheckboxInput
 from rangefilter.filters import DateRangeFilterBuilder, DateTimeRangeFilterBuilder, NumericRangeFilterBuilder
 
 from classes.models import Student
-from orders.models import Product, Order, OrderItem, Menu, MenuItem, Cart, CartItem
+# from orders.models import Product, Order, OrderItem, Menu, MenuItem, Cart, CartItem
 from django.db import models
+
+from orders.models.cart import CartItem, Cart
+from orders.models.menu import MenuItem, Menu
+from orders.models.order import OrderItem, Order
+from orders.models.product import Product
+
 
 @admin.register(Product)
 class ProductAdmin(ModelAdmin):
