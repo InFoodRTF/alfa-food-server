@@ -3,7 +3,7 @@ from datetime import datetime
 from rest_framework.exceptions import ValidationError
 
 from common.services import create_objects
-from orders.models import OrderItem
+from orders.models.order import OrderItem
 
 
 def create_order_items(item):

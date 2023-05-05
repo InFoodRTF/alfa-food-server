@@ -22,9 +22,13 @@ from rest_framework.routers import SimpleRouter
 from accounts.views import UserAPIView
 from alfafood import settings
 from classes.views import StudentViewSet, AttendanceViewSet, GradeViewSet
-from orders.views import OrderViewSet, OrderItemViewSet, ProductViewSet, MyOwnView, MenuViewSet, CartViewSet
 
 from django.conf.urls.static import static
+
+from orders.views.cart import CartViewSet
+from orders.views.menu import MenuViewSet
+from orders.views.order import OrderViewSet, OrderItemViewSet
+from orders.views.product import ProductViewSet
 
 router = SimpleRouter()
 
@@ -52,7 +56,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('user/', UserAPIView.as_view()),
     path('auth/', include('accounts.urls')),
-    path('canteen/', MyOwnView.as_view())
+    # path('canteen/', MyOwnView.as_view())
 ]
 
 urlpatterns += router.urls

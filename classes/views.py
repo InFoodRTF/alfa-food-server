@@ -16,7 +16,7 @@ from classes.models import Student, Attendance, Grade, AttendanceChoice, MealCat
 from classes.serializers import StudentSerializer, AttendanceSerializer, GradeSerializer, StudentParentSerializer, \
     GradeParentSerializer
 from common.services import all_objects, filter_objects, create_objects
-from orders.models import Order
+from orders.models.order import Order
 
 
 # Create your views here.

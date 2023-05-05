@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.admin import ModelAdmin
 
 from classes.models import Student, Grade, Attendance, MealTime, MealCategory
-from orders.models import Cart, CartItem
+
 
 
 # Register your models here.
