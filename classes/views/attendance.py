@@ -1,190 +1,127 @@
-import datetime
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import status
+from django.http import Http404
+from rest_framework import viewsets, generics, mixins
+from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
-from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet
 
-from classes.models.attendance import Attendance
+from classes.models.attendance import Attendance, StudentAttendance
 from classes.models.grade import Grade
 from classes.models.meal_features import MealCategory
 from classes.models.student import Student
-from common.services import all_objects
+from classes.serializers.attendance import AttendanceSerializer, StudentAttendanceSerializer#, GradeAttendanceSerializer
+from common.services import all_objects, filter_objects
 from orders.models.order import Order
 
 
-from classes.serializers.attendance import AttendanceSerializer
-
-
-class AttendanceViewSet(ModelViewSet):
-
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['grade', 'date', '']
-
-    def get_object(self):
-        """
-        Returns the object the view is displaying.
-
-        You may want to override this if you need to provide non-standard
-        queryset lookups.  Eg if objects are referenced using multiple
-        keyword arguments in the url conf.
-        """
-        queryset = self.filter_queryset(self.get_queryset())
-
-        # Perform the lookup filtering.
-        lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
-
-        assert lookup_url_kwarg in self.kwargs, (
-                'Expected view %s to be called with a URL keyword argument '
-                'named "%s". Fix your URL conf, or set the `.lookup_field` '
-                'attribute on the view correctly.' %
-                (self.__class__.__name__, lookup_url_kwarg)
-        )
-
-        filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
-        obj = get_object_or_404(queryset, **filter_kwargs)
-
-        # May raise a permission denied
-        self.check_object_permissions(self.request, obj)
-
-        return obj
-
-    def partial_update(self, request, *args, **kwargs):
-        kwargs['partial'] = True
-        mark_attendance = request.data.get('mark_attendance')
-        if mark_attendance is not None:
-            kwargs['mark_attendance'] = mark_attendance
-        else:
-            return Response({'detail': 'Разрешено изменять только поле mark_attendance'},
-                            status=status.HTTP_400_BAD_REQUEST)
-        return self.update(request, *args, **kwargs)
-
-    # def perform_update(self, serializer):
-    #     attendance_instance = serializer.instance
-    #     request = self.request
-    #     mark_attendance = request.data.get('mark_attendance')
-    #
-    #     if mark_attendance is None:
-    #         return Response({'detail': 'Wrong parameters'}, status=status.HTTP_400_BAD_REQUEST)
-    #
-    #     serializer.save(mark_attendance=mark_attendance)
-    #     return Response(status=status.HTTP_200_OK)
-
-    # def patch(self, request, pk):
-    #     testmodel_object = self.get_object(pk)
-    #     serializer = AttendanceSerializer(testmodel_object, data=request.data,
-    #                                      partial=True)  # set partial=True to update a data partially
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    #     return Response({'detail': 'wrong parameters'}, status=status.HTTP_400_BAD_REQUEST)
+class AttendanceViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint для просмотра, создания, изменения и удаления объектов Attendance
+    """
+    queryset = Attendance.objects.all()
+    serializer_class = AttendanceSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        """
-        This view should return a list of all the purchases
-        for the currently authenticated user.
-        """
         user = self.request.user
 
-        if self.action == "partial_update":
-            return Attendance.objects.all()
-
-        data_grade_id = self.request.query_params.get('grade')
-
-        if data_grade_id is None:
-            raise ValidationError({'detail': 'Grade was not provided'})
-
-        grade = Grade.objects.get(name=data_grade_id)  #
-
-        try:
-            attendance_date = self.request.query_params.get('date')
-            datetime.datetime.strptime(attendance_date, '%Y-%m-%d')
-        except:
-            raise ValidationError({'detail': "Date was not provided or incorrect data format, should be YYYY-MM-DD"})
-
-        meal_category = self.request.query_params.get('meal_category')
-
-        if meal_category is None:
-            raise ValidationError({'detail': 'Meal category was not provided'})
-        # try:
-        #     meal_category = self.request.data['meal_category']
-        #
-        #     grade.meal_time.get(meal_category=meal_category)
-        # except:
-        #     return Response({'detail': 'Meal category was not provided'}, status=status.HTTP_400_BAD_REQUEST)
-
-        all_students = grade.student_set.all()
-
-        orders_meal_category = Order.objects.filter(student_id__in=all_students,
-                                                    order_date=attendance_date).filter(meal_category=meal_category)
-        students_order = Student.objects.filter(order__in=orders_meal_category)
-        #Student.objects.filter(orderset=orders_meal_category).values() Student.objects.filter(order__in=orders_meal_category)
-
-        for student in students_order:
-            if not Attendance.objects.filter(student=student.id, date=attendance_date, meal_category=meal_category):
-                Attendance.objects.create(student=student,
-                                          grade=grade,
-                                          meal_category=MealCategory.objects.get(id=meal_category),
-                                          date=attendance_date,
-                                          mark_attendance=1,
-                                          reason="")
-
-        if user.is_staff or hasattr(user, "canteenemployee"):
+        if user.is_staff:
             return all_objects(Attendance.objects)
 
+        if hasattr(user, "parent"):
+            # TODO: Это сейчас не работает, просто ради заглушки
+            ...
+
         if hasattr(user, "teacher"):
-            return Attendance.objects.filter(student_id__in=students_order,
-                                             date=attendance_date, meal_category=meal_category)
+            teacher_grades = filter_objects(Grade.objects, teacher=user.teacher.id)
+            return filter_objects(Attendance.objects, grade__in=teacher_grades)
 
-    def create(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        serializer = AttendanceSerializer(queryset, many=True)
-        data = serializer.data
-        return Response({'attendance': data},
-                        status=status.HTTP_200_OK)  # Переделать
-        # user = request.user
-        #
-        # try:
-        #     if isinstance(user.teacher, Teacher):
-        #        pass
-        # except:
-        #     return Response({'detail': 'User must be Teacher'}, status=status.HTTP_400_BAD_REQUEST)
-        #
-        # student = request.data.get('student')
-        #
-        # if student and len(student) == 0 or student is None:
-        #     return Response({'detail': 'Student item was not provided'}, status=status.HTTP_400_BAD_REQUEST)
-        #
-        # mark_attendance = request.data.get('mark_attendance')
-        # if mark_attendance is None or int(mark_attendance) not in [member.value for member in AttendanceChoice]:
-        #     mark_attendance = AttendanceChoice.PRESENT
-        #
-        #
-        # # Step 1: Create attendance
-        #
-        # date_attendance = request.data.get("date")
-        # if date_attendance is None:
-        #     date_attendance = date.today()
-        #
-        #
-        # reason = request.data.get('reason')
-        # if reason is None:
-        #     reason = ""
-        #
-        # student = Student.objects.get(id=student)
-        # attendance = create_objects(
-        #     Attendance.objects,
-        #     teacher=user.teacher,
-        #     student=student,
-        #     grade=student.grade,
-        #     mark_attendance=int(mark_attendance),
-        #     date=date_attendance,
-        #     reason=reason
-        # )
-        #
-        # serializer = AttendanceSerializer(attendance)
-        # return Response(serializer.data)
+    @action(detail=False, methods=['get'], url_path='grade/(?P<grade_pk>\d+)')
+    def list_by_grade(self, request, grade_pk=None):
+        """
+        Список посещений для определенного студента
+        """
+        queryset = StudentAttendance.objects.filter(attendance__grade=grade_pk) #StudentAttendance.objects.filter(grade=grade_pk)
+        if not queryset.exists():
+            raise Http404
+        serializer = StudentAttendanceSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'], url_path='student/(?P<student_pk>\d+)')
+    def list_by_student(self, request, student_pk=None):
+        """
+        Список посещений для определенного студента
+        """
+        queryset = StudentAttendance.objects.filter(student=student_pk)
+        serializer = StudentAttendanceSerializer(queryset, many=True)
+        return Response(serializer.data)
 
 
-    serializer_class = AttendanceSerializer
+
+
+# class StudentAttendanceViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
+#     """
+#     ViewSet для посещаемости студента
+#     """
+#     queryset = Attendance.objects.all()
+#     serializer_class = AttendanceSerializer
+#
+#     def perform_create(self, serializer):
+#         # Получаем данные из запроса
+#         student_id = self.kwargs['student_id']
+#         meal_category_id = self.request.data.get('meal_category')
+#         date = self.request.data.get('date')
+#
+#         # Получаем объекты из БД
+#         student = Student.objects.get(pk=student_id)
+#         meal_category = MealCategory.objects.get(pk=meal_category_id)
+#
+#         # Проверяем, был ли сделан заказ на эту дату
+#         if not Order.objects.filter(student=student, meal_category=meal_category, date=date).exists():
+#             raise ValidationError("Заказ на данную дату не найден")
+#
+#         # Добавляем данные об ученике и дате в сериализатор перед сохранением
+#         serializer.save(student=student, date=date)
+#
+#     @action(detail=True, methods=['get'])
+#     def list_by_student(self, request, pk=None):
+#         """
+#         Список посещений для определенного студента
+#         """
+#         queryset = self.queryset.filter(student=pk)
+#         serializer = self.get_serializer(queryset, many=True)
+#         return Response(serializer.data)
+#
+#
+# class ClassAttendanceViewSet(viewsets.GenericViewSet, mixins.CreateModelMixin):
+#     """
+#     ViewSet для посещаемости класса
+#     """
+#     queryset = Attendance.objects.all()
+#     serializer_class = AttendanceSerializer
+#
+#     def perform_create(self, serializer):
+#         # Получаем данные из запроса
+#         grade_id = self.kwargs['grade_id']
+#         meal_category_id = self.request.data.get('meal_category')
+#         date = self.request.data.get('date')
+#
+#         # Получаем объекты из БД
+#         grade = Grade.objects.get(pk=grade_id)
+#         meal_category = MealCategory.objects.get(pk=meal_category_id)
+#
+#         # Проверяем, был ли сделан заказ на эту дату
+#         if not Order.objects.filter(grade=grade, meal_category=meal_category, date=date).exists():
+#             raise ValidationError("Заказ на данную дату не найден")
+#
+#         # Добавляем данные о классе и дате в сериализатор перед сохранением
+#         serializer.save(grade=grade, date=date)
+#
+#     @action(detail=True, methods=['get'])
+#     def list_by_class(self, request, pk=None):
+#         """
+#         Список посещений для определенного класса
+#         """
+#         queryset = self.queryset.filter(grade=pk)
+#         serializer = self.get_serializer(queryset, many=True)
+#         return Response(serializer.data)

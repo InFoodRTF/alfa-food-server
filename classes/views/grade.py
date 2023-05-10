@@ -1,14 +1,28 @@
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from classes.models.grade import Grade
 from classes.models.student import Student
 from classes.serializers.grade import GradeParentSerializer, GradeSerializer
+from classes.serializers.student import StudentSerializer
 
 
 class GradeViewSet(ModelViewSet):
+    permission_classes = [IsAuthenticated]
+
+    @action(detail=True, methods=['get'], url_path='students')
+    def list_students_by_grade(self, request, pk=None):
+        """
+        Список студентов выбранного класса
+        """
+        queryset = Student.objects.filter(grade=pk)
+        serializer = StudentSerializer(queryset, many=True)
+        return Response(serializer.data)
+
     def get_object(self):
         # queryset = self.get_queryset()
 

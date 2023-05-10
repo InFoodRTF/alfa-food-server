@@ -20,16 +20,27 @@ class Attendance(models.Model):
         verbose_name = "Посещаемость"
         verbose_name_plural = "Посещаемость"
 
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, verbose_name="Идентификатор ученика")
     grade = models.ForeignKey(Grade, on_delete=models.CASCADE, verbose_name="Иденитификатор класса")
     meal_category = models.ForeignKey(MealCategory, on_delete=models.CASCADE, verbose_name="Приём пищи")
-    # teacher = models.ForeignKey(Teacher, on_delete=models.RESTRICT, verbose_name="Идентификатор учителя")
     date = models.DateField(default=date.today, verbose_name="Дата посещения")
+
+    def __str__(self):
+        return f"Посещаемость класса {self.grade} на {self.date}"
+
+
+class StudentAttendance(models.Model):
+    class Meta:
+        db_table = "student_attendance"
+        verbose_name = "Посещаемость студента"
+        verbose_name_plural = "Посещаемость студента"
+
+    attendance = models.ForeignKey(Attendance, on_delete=models.CASCADE, related_name='student_attendances')
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, verbose_name="Идентификатор ученика")
     mark_attendance = models.PositiveSmallIntegerField(
         choices=AttendanceChoice.choices,
         default=AttendanceChoice.PRESENT, verbose_name="Отметка посещаемости"
     )
-    reason = models.TextField(verbose_name="Причина отсутствия", null=True, blank=True)
+    absent_reason = models.TextField(verbose_name="Причина отсутствия", null=True, blank=True)
 
     def __str__(self):
         return f"{self.student.get_full_name()}: {AttendanceChoice(self.mark_attendance).label} (ID: {self.id})"

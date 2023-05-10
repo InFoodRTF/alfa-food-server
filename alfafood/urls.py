@@ -41,6 +41,11 @@ router.register(r'products', ProductViewSet, basename='Product')
 router.register(r'students', StudentViewSet, basename="Student")
 
 router.register(r'attendance', AttendanceViewSet, basename="Attendance")
+# router.register(r'attendance', AttendanceViewSet)
+# router.register(r'attendance/class', ClassAttendanceViewSet, basename='class_attendance')
+# router.register(r'attendance/student', StudentAttendanceViewSet, basename='student_attendance')
+
+
 router.register(r'grades', GradeViewSet, basename="Grade")
 router.register(r'menu', MenuViewSet, basename="Menu")
 
