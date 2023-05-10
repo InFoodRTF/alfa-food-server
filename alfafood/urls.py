@@ -21,10 +21,12 @@ from rest_framework.routers import SimpleRouter
 
 from accounts.views import UserAPIView
 from alfafood import settings
-from classes.views import StudentViewSet, AttendanceViewSet, GradeViewSet
 
 from django.conf.urls.static import static
 
+from classes.views.attendance import AttendanceViewSet
+from classes.views.grade import GradeViewSet
+from classes.views.student import StudentViewSet
 from orders.views.cart import CartViewSet
 from orders.views.menu import MenuViewSet
 from orders.views.order import OrderViewSet, OrderItemViewSet
@@ -59,7 +61,7 @@ urlpatterns = [
     # path('canteen/', MyOwnView.as_view())
 ]
 
-urlpatterns += router.urls
+urlpatterns += router.get_urls()
 
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

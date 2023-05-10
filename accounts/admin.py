@@ -8,8 +8,6 @@ from django.contrib.auth.admin import UserAdmin
 
 # Register your models here.
 
-from knox.admin import AuthTokenAdmin
-
 
 @admin.register(Profile)
 class ProfileAdmin(ModelAdmin):

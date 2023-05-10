@@ -33,8 +33,8 @@ def save_user_profile(sender, instance, **kwargs):
 class Parent(models.Model):
     class Meta:
         db_table = "parents"
-        verbose_name = "Родителя"
-        verbose_name_plural = "Родителей"
+        verbose_name = "Родитель"
+        verbose_name_plural = "Родители"
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     balance = models.FloatField(default=0.0)
@@ -50,7 +50,7 @@ class Teacher(models.Model):
     class Meta:
         db_table = "teachers"
         verbose_name = "Учитель"
-        verbose_name_plural = "Учители"
+        verbose_name_plural = "Учителя"
 
     user = models.OneToOneField(User,  on_delete=models.CASCADE)
 

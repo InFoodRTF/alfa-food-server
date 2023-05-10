@@ -2,7 +2,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from accounts.models import Parent
-from classes.models import Student
+from classes.models.student import Student
 from orders.models.menu import Menu, MenuItem
 
 

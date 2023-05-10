@@ -2,7 +2,7 @@ from django.db import models
 
 from datetime import date, datetime
 
-from classes.models import MealCategory
+from classes.models.meal_features import MealCategory
 from common.models import DateTimeFieldsModel
 from django.utils.translation import gettext_lazy as _
 

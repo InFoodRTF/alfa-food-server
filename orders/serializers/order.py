@@ -1,6 +1,6 @@
 from rest_framework.serializers import ModelSerializer
 
-from classes.serializers import StudentParentSerializer, StudentSerializer
+from classes.serializers.student import StudentParentSerializer, StudentSerializer
 from orders.models.order import OrderItem, Order
 
 

@@ -1,8 +1,10 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
 
-from classes.models import Student, Grade, Attendance, MealTime, MealCategory
-
+from classes.models.attendance import Attendance
+from classes.models.grade import Grade
+from classes.models.meal_features import MealTime, MealCategory
+from classes.models.student import Student
 
 
 # Register your models here.

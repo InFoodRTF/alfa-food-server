@@ -26,7 +26,8 @@ class MenuSerializer(ModelSerializer):
     @staticmethod
     def get_items(obj):
         # result = {meal_category.category_name: [] for meal_category in MealCategory.objects.all()}
-        result = {}
+        result = {} # TODO: Вывод категорий меню по порядку (Завтрак, Обед, Полдник, Ужин и только потом другие)
+        # Либо придумай как по другому делать сортировку.
 
         for item in obj.menu_set.all():
             item_meal_category_name = item.meal_category.category_name

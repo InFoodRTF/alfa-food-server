@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -9,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from accounts.models import Parent
-from classes.models import Student
+from classes.models.student import Student
 from common.services import all_objects, filter_objects
 from orders.models.cart import CartItem, Cart
 from orders.models.menu import MenuItem, Menu
