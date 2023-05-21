@@ -23,6 +23,7 @@ class GradeAdmin(ModelAdmin):
 class AttendanceAdmin(ModelAdmin):
     pass
 
+
 @admin.register(StudentAttendance)
 class StudentAttendanceAdmin(ModelAdmin):
     pass

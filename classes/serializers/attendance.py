@@ -2,12 +2,15 @@ from rest_framework import serializers
 
 from classes.models.attendance import Attendance, StudentAttendance, AttendanceChoice
 from classes.serializers.grade import GradeSerializer
+from classes.serializers.student import StudentSerializer
 
 
 class AttendanceSerializer(serializers.ModelSerializer):
     """
     Сериализатор модели Attendance
     """
+
+    attended_students = StudentSerializer(many=True, read_only=True, context={'exclude_fields': 'grade'})
 
     class Meta:
         model = Attendance

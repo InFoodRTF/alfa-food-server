@@ -15,11 +15,12 @@ class GradeViewSet(ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     @action(detail=True, methods=['get'], url_path='students')
-    def list_students_by_grade(self, request, pk=None):
+    def list_students_by_grade_name(self, request, pk=None):
         """
         Список студентов выбранного класса
         """
-        queryset = Student.objects.filter(grade=pk)
+        grade = get_object_or_404(Grade, name=pk)
+        queryset = Student.objects.filter(grade=grade)
         serializer = StudentSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -32,6 +33,7 @@ class GradeViewSet(ModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         queryset = Grade.objects.all()
+
         user = get_object_or_404(queryset, name=self.kwargs.get('pk'))
         serializer = GradeParentSerializer(user)
         return Response(serializer.data)

@@ -17,9 +17,6 @@ class Cart(models.Model):
     customer = models.OneToOneField(Parent, on_delete=models.CASCADE,
                                     verbose_name='Покупатель', related_name='cart_customer')
 
-    # customer = models.ForeignKey(Parent, on_delete=models.CASCADE,
-    #                              verbose_name='Покупатель', related_name='cart_customer')  # User -> Parent
-
     student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True, blank=True,
                                 verbose_name='Ученик', related_name='cart_student')  # TODO: Это не работает. Исправить.
 

@@ -2,6 +2,7 @@ from django.http import Http404
 from rest_framework import viewsets, generics, mixins
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -36,14 +37,24 @@ class AttendanceViewSet(viewsets.ModelViewSet):
             teacher_grades = filter_objects(Grade.objects, teacher=user.teacher.id)
             return filter_objects(Attendance.objects, grade__in=teacher_grades)
 
-    @action(detail=False, methods=['get'], url_path='grade/(?P<grade_pk>\d+)')
-    def list_by_grade(self, request, grade_pk=None):
+    @action(detail=False, methods=['get'], url_path='grade/(?P<grade_name>.+)')
+    def list_by_grade(self, request, grade_name=None):
         """
-        Список посещений для определенного студента
+        Список посещений всех студентов выбранного класса
         """
-        queryset = StudentAttendance.objects.filter(attendance__grade=grade_pk) #StudentAttendance.objects.filter(grade=grade_pk)
+        if not grade_name:
+            raise Http404
+        grade = get_object_or_404(Grade, name=grade_name)
+        queryset = StudentAttendance.objects.filter(attendance__grade=grade)
+
+        # if grade_name:
+        #     queryset = StudentAttendance.objects.filter(attendance__grade_id=grade_pk)
+        # else:
+        #     grade_name = request.query_params.get('grade_name')
+
         if not queryset.exists():
             raise Http404
+
         serializer = StudentAttendanceSerializer(queryset, many=True)
         return Response(serializer.data)
 
