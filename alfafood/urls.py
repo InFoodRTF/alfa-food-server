@@ -17,14 +17,14 @@ from django.contrib import admin
 from django.shortcuts import render
 from django.urls import path, include
 from django.views import View
-from rest_framework.routers import SimpleRouter
+from rest_framework.routers import DefaultRouter
 
 from accounts.views import UserAPIView
 from alfafood import settings
 
 from django.conf.urls.static import static
 
-from classes.views.attendance import AttendanceViewSet
+from classes.views.attendance import AttendanceViewSet, GradeAttendanceViewSet, StudentAttendanceViewSet
 from classes.views.grade import GradeViewSet
 from classes.views.student import StudentViewSet
 from orders.views.cart import CartViewSet
@@ -32,7 +32,7 @@ from orders.views.menu import MenuViewSet
 from orders.views.order import OrderViewSet, OrderItemViewSet
 from orders.views.product import ProductViewSet
 
-router = SimpleRouter()
+router = DefaultRouter()
 
 router.register(r'orders', OrderViewSet, basename='Order')
 router.register(r'orderitems', OrderItemViewSet)
@@ -40,10 +40,10 @@ router.register(r'products', ProductViewSet, basename='Product')
 
 router.register(r'students', StudentViewSet, basename="Student")
 
+router.register('attendances/grade', GradeAttendanceViewSet)
+router.register('attendances/student', StudentAttendanceViewSet, basename='student_attendance')
 router.register(r'attendances', AttendanceViewSet, basename="Attendance")
 # router.register(r'attendance', AttendanceViewSet)
-# router.register(r'attendance/class', ClassAttendanceViewSet, basename='class_attendance')
-# router.register(r'attendance/student', StudentAttendanceViewSet, basename='student_attendance')
 
 
 router.register(r'grades', GradeViewSet, basename="Grade")
@@ -52,11 +52,13 @@ router.register(r'menu', MenuViewSet, basename="Menu")
 # To CART urls
 router.register(r'cart', CartViewSet, basename="Cart")
 
+
 class HomepageView(View):
     '''вывод данных профессий'''
 
     def get(self, request):
         return render(request, 'homepage.html')
+
 
 urlpatterns = [
     path('', HomepageView.as_view(), name='homepage'),
