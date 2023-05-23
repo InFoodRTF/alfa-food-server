@@ -1,1 +1,0 @@
-9999999999{"name": "django-filter", "version": "23.1", "summary": "Django-filter is a reusable Django application for allowing users to filter querysets dynamically.", "platform": null, "requires_dist": ["Django (>=3.2)"], "requires_python": ">=3.7", "files": [], "_cache_version": "1.0.0"}

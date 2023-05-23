@@ -1,1 +1,0 @@
-9999999999{"name": "sqlparse", "version": "0.4.4", "summary": "A non-validating SQL parser.", "platform": null, "requires_dist": ["flake8 ; extra == \"dev\"", "build ; extra == \"dev\"", "sphinx ; extra == \"doc\"", "pytest ; extra == \"test\"", "pytest-cov ; extra == \"test\""], "requires_python": ">=3.5", "files": [], "_cache_version": "1.0.0"}
