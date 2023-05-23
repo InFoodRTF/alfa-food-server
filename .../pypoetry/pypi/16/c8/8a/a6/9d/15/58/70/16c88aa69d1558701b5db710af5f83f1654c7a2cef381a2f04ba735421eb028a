@@ -1,0 +1,1 @@
+9999999999{"name": "asgiref", "version": "3.6.0", "summary": "ASGI specs, helper code, and adapters", "platform": null, "requires_dist": ["typing-extensions ; python_version < \"3.8\"", "pytest ; extra == 'tests'", "pytest-asyncio ; extra == 'tests'", "mypy (>=0.800) ; extra == 'tests'"], "requires_python": ">=3.7", "files": [], "_cache_version": "1.0.0"}

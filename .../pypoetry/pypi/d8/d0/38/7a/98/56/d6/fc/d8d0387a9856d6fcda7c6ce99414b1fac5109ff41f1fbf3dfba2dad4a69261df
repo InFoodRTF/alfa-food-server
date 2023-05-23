@@ -1,0 +1,1 @@
+9999999999{"name": "django-rest-knox", "version": "4.2.0", "summary": "Authentication for django rest framework", "platform": "", "requires_dist": ["cryptography", "django (>=3.2)", "djangorestframework"], "requires_python": ">=3.6", "files": [], "_cache_version": "1.0.0"}

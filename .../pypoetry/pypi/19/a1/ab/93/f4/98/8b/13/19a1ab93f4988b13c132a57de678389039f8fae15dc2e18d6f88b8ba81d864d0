@@ -1,0 +1,1 @@
+9999999999{"name": "djangorestframework", "version": "3.14.0", "summary": "Web APIs for Django, made easy.", "platform": null, "requires_dist": ["django (>=3.0)", "pytz"], "requires_python": ">=3.6", "files": [], "_cache_version": "1.0.0"}
