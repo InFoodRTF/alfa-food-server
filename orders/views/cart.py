@@ -36,7 +36,7 @@ class CartViewSet(ModelViewSet):
         # except (Cart.DoesNotExist, KeyError):
         #     return Response({"error": "Requested Cart does not exist"}, status=status.HTTP_404_NOT_FOUND)
 
-        if isinstance(user.parent, Parent):
+        if hasattr(user, 'parent'):
             instance = self.get_object()
 
             if request.query_params:

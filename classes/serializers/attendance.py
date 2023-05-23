@@ -21,9 +21,10 @@ class StudentAttendanceSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         rep = super().to_representation(instance)
-        rep['mark_attendance'] = AttendanceChoice(instance.mark_attendance).label
+        rep['mark_attendance'] = True if instance.mark_attendance == 1 else False # AttendanceChoice(instance.mark_attendance)
         # rep['student'] = instance.student.get_full_name()
         return rep
+
 
 
 class AttendanceSerializer(serializers.ModelSerializer):
