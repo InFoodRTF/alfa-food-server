@@ -307,6 +307,19 @@ class StudentAttendanceViewSet(viewsets.ModelViewSet):
     queryset = StudentAttendance.objects.all()
     serializer_class = StudentAttendanceSerializer
 
+    def partial_update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        mark_attendance = request.data.get('mark_attendance')
+
+        if mark_attendance == 'true':
+            instance.mark_attendance = AttendanceChoice.PRESENT
+        elif mark_attendance == 'false':
+            instance.mark_attendance = AttendanceChoice.ABSENT
+
+        instance.save()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
     def get_queryset(self):
         user = self.request.user
         queryset_kwargs = dict()
