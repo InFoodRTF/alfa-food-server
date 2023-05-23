@@ -39,7 +39,6 @@ class AttendanceSerializer(serializers.ModelSerializer):
 
 
 
-
 # class GradeAttendanceSerializer(StudentAttendanceSerializer):
 #     class Meta(StudentAttendanceSerializer.Meta):
 #         fields = StudentAttendanceSerializer.Meta.fields
