@@ -34,3 +34,10 @@ def date_format_validate(date_text):
         raise ValidationError(detail=f"Значение '{date_text}' имеет неверный формат даты. Оно должно быть в "
                                      f"формате DD.MM.YYYY")
     return validated_date
+
+
+def get_or_none(model, *args, **kwargs):
+    try:
+        return model.objects.get(*args, **kwargs)
+    except model.DoesNotExist:
+        return None
