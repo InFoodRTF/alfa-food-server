@@ -36,7 +36,7 @@ class MenuViewSet(ModelViewSet):
         if not meal_category_name:
             return Response({"error": "Meal Category Name not provided."}, status=status.HTTP_400_BAD_REQUEST)
 
-        menu = Menu.objects.filter(pk=product_id).first()
+        menu = Menu.objects.filter(pk=menu_id).first()
         meal_category = MealCategory.objects.filter(category_name=meal_category_name).first()
         product = Product.objects.filter(pk=product_id).first()
         if menu is None:
