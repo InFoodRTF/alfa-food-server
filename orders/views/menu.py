@@ -90,7 +90,7 @@ class MenuViewSet(ModelViewSet):
         instance = self.get_object()
         active_param = request.data.get('active')#{'active': item.active if item.date_implementation == valid_menu_date.date() else False}
 
-        menu_date_implementation = request.data.get('date_implementation')
+        menu_date_implementation = request.data.get('date')
 
         if not (active_param and menu_date_implementation):
             return Response({"error": "Active or Date_Implementation not provided."})
