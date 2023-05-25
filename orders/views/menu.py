@@ -66,16 +66,20 @@ class MenuViewSet(ModelViewSet):
 
     @permission_classes([IsCustomRole("canteenemployee")])
     @action(detail=False, methods=['get'], url_path="list")
-    def get_all_menus_name_and_id(self, request, pk=None):
+    def get_all_menus_name_and_id(self, request, menu_date=None, pk=None):
         queryset = self.get_queryset()
 
-        menu_date = request.query_params.get('date')
+        if menu_date is None:
+            menu_date = request.query_params.get('date')
 
         if menu_date:
-            valid_menu_date = date_format_validate(menu_date)
+            if isinstance(menu_date, str):
+                valid_menu_date = date_format_validate(menu_date).date()
+            else:
+                valid_menu_date = menu_date
 
             data = [{'id': item.id, 'name': item.get_name(),
-                     'active': item.active if item.date_implementation == valid_menu_date.date() else False,
+                     'active': item.active if item.date_implementation == valid_menu_date else False,
                      'date_implementation': item.get_date()}
                     for item in queryset]
         else:
@@ -93,7 +97,7 @@ class MenuViewSet(ModelViewSet):
         menu_date_implementation = request.data.get('date')
 
         if not (active_param and menu_date_implementation):
-            return Response({"error": "Active or Date_Implementation not provided."})
+            return Response({"error": "Active or Date not provided."})
 
         valid_menu_date_implementation = date_format_validate(menu_date_implementation).date()
 
@@ -103,7 +107,7 @@ class MenuViewSet(ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        return Response(serializer.data)
+        return self.get_all_menus_name_and_id(request=request, menu_date=valid_menu_date_implementation)
 
     def list(self, request, *args, **kwargs):  # Переопределил вывод GET ModelViewSet
         queryset = self.get_queryset()
