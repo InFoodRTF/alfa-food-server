@@ -51,10 +51,24 @@ class Menu(ActiveObjectMixin, DateTimeFieldsModel):
         verbose_name_plural = "Меню"
 
     date_implementation = models.DateField(default=date.today)
+    name = models.CharField(max_length=50, verbose_name="Название меню", null=True, blank=False, default=None)
     # menu_items = models.ForeignKey(MenuItem, on_delete=models.CASCADE, null=True)
 
+    def get_name(self):
+        if self.name is None or len(self.name) <= 0:
+            return f"Меню от {self.created.strftime('%d.%m.%Y %H:%M')}"
+        else:
+            return self.name
+
+    def get_date(self):
+        return self.date_implementation.strftime('%d.%m.%Y')
+
     def __str__(self):
-        return f"Меню на {self.date_implementation} : от {datetime.date(self.created)} - (id: {self.id})"
+        if self.name is None or len(self.name) <= 0:
+            return f"Меню на {self.date_implementation} : от " \
+                   f"{self.created.strftime('%d.%m.%Y %H:%M:%S')} - (id: {self.id})"
+
+        return self.name
 
 
 class MenuItem(models.Model):

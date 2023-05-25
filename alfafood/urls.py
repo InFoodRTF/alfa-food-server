@@ -28,7 +28,7 @@ from classes.views.attendance import AttendanceViewSet, StudentAttendanceViewSet
 from classes.views.grade import GradeViewSet
 from classes.views.student import StudentViewSet
 from orders.views.cart import CartViewSet
-from orders.views.menu import MenuViewSet
+from orders.views.menu import MenuViewSet, MenuItemViewSet
 from orders.views.order import OrderViewSet, OrderItemViewSet
 from orders.views.product import ProductViewSet
 
@@ -48,6 +48,7 @@ router.register(r'attendances', AttendanceViewSet, basename="Attendance")
 
 router.register(r'grades', GradeViewSet, basename="Grade")
 router.register(r'menu', MenuViewSet, basename="Menu")
+router.register(r'menuitems', MenuItemViewSet, basename="MenuItem")
 
 # To CART urls
 router.register(r'cart', CartViewSet, basename="Cart")

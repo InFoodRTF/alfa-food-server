@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from rest_framework.fields import SerializerMethodField
 from rest_framework.serializers import ModelSerializer
 
@@ -25,9 +27,9 @@ class MenuSerializer(ModelSerializer):
 
     @staticmethod
     def get_items(obj):
-        # result = {meal_category.category_name: [] for meal_category in MealCategory.objects.all()}
-        result = {} # TODO: Вывод категорий меню по порядку (Завтрак, Обед, Полдник, Ужин и только потом другие)
+        result = {}
         # Либо придумай как по другому делать сортировку.
+        meal_categories = ['Завтрак', 'Обед', 'Полдник', 'Ужин']
 
         for item in obj.menu_set.all():
             item_meal_category_name = item.meal_category.category_name
@@ -36,12 +38,20 @@ class MenuSerializer(ModelSerializer):
 
             result.setdefault(item_meal_category_name, list()).append(item_serializer.data)
 
-        return result
+        sorted_result = {key: result[key] for key in meal_categories if key in result}
+        sorted_result.update({key: result[key] for key in result if key not in meal_categories})
+
+        return sorted_result
 
     class Meta:
         model = Menu
-        exclude = ['id', ]
+        fields = '__all__'
+        #exclude = ['id', ]
 
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        rep['name'] = instance.get_name()
+        return rep
 
 # class MenuItemParentSerializer(ModelSerializer):
 #     class Meta:
