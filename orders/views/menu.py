@@ -86,6 +86,25 @@ class MenuViewSet(ModelViewSet):
 
         return Response(data)
 
+    def partial_update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        active_param = request.data.get('active')#{'active': item.active if item.date_implementation == valid_menu_date.date() else False}
+
+        menu_date_implementation = request.data.get('date_implementation')
+
+        if not (active_param and menu_date_implementation):
+            return Response({"error": "Active or Date_Implementation not provided."})
+
+        valid_menu_date_implementation = date_format_validate(menu_date_implementation).date()
+
+        data = {'active': active_param, 'date_implementation': valid_menu_date_implementation}
+
+        serializer = self.get_serializer(instance, data=data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)
+
     def list(self, request, *args, **kwargs):  # Переопределил вывод GET ModelViewSet
         queryset = self.get_queryset()
 

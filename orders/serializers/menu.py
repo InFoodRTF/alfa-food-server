@@ -1,5 +1,3 @@
-from collections import OrderedDict
-
 from rest_framework.fields import SerializerMethodField
 from rest_framework.serializers import ModelSerializer
 
@@ -17,6 +15,8 @@ class MenuItemSerializer(ModelSerializer):
         rep = super(MenuItemSerializer, self).to_representation(instance)
         # TODO:Сделай продукт красивее
         rep['product'] = ProductSerializer().to_representation(Product.objects.get(pk=rep['product']))
+
+        rep['meal_category'] = instance.meal_category.category_name
         return rep
 
 
