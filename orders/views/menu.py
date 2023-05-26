@@ -80,7 +80,7 @@ class MenuViewSet(ModelViewSet):
         #     return Response({"error": "The provided Menu ID does not exist."})
 
         try:
-            menu_item = MenuItem.objects.get(menuitem_id)
+            menu_item = MenuItem.objects.get(pk=menuitem_id)
         except MenuItem.DoesNotExist:
             return Response({"error": "MenuItem not found in menu."}, status=status.HTTP_404_NOT_FOUND)
 
