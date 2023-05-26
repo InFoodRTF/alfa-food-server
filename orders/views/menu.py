@@ -63,6 +63,42 @@ class MenuViewSet(ModelViewSet):
         # headers = self.get_success_headers(menu_item_serializer.data)
         # return Response(menu_item_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
+    @permission_classes([IsCustomRole("canteenemployee")])
+    @action(detail=False, methods=['post', 'delete'], url_path="item/remove")
+    def remove_menu_item(self, request, pk=None):
+        # menu_id = request.data.get("menu_id")
+
+        menuitem_id = request.data.get("menuitem_id")
+
+        # if not menu_id:
+        #     return Response({"error": "Menu ID not provided."}, status=status.HTTP_400_BAD_REQUEST)
+        if not menuitem_id:
+            return Response({"error": "MenuItem ID not provided."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # menu = Menu.objects.filter(pk=menu_id).first()
+        # if menu is None:
+        #     return Response({"error": "The provided Menu ID does not exist."})
+
+        try:
+            menu_item = MenuItem.objects.get(menuitem_id)
+        except MenuItem.DoesNotExist:
+            return Response({"error": "MenuItem not found in menu."}, status=status.HTTP_404_NOT_FOUND)
+
+        menu = menu_item.menu
+
+        req_method = str(request.method).lower()
+
+        if req_method == 'delete':
+            menu_item.delete()
+        elif req_method == 'post':
+            if menu_item.quantity > 1:
+                menu_item.quantity -= 1
+                menu_item.save()
+            else:
+                menu_item.delete()
+
+        serializer = MenuSerializer(menu)
+        return Response(serializer.data)
 
     @permission_classes([IsCustomRole("canteenemployee")])
     @action(detail=False, methods=['get'], url_path="list")
