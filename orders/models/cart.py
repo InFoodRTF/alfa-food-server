@@ -2,7 +2,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from accounts.models import Parent
-from classes.models import Student
+from classes.models.student import Student
 from orders.models.menu import Menu, MenuItem
 
 
@@ -16,9 +16,6 @@ class Cart(models.Model):
 
     customer = models.OneToOneField(Parent, on_delete=models.CASCADE,
                                     verbose_name='Покупатель', related_name='cart_customer')
-
-    # customer = models.ForeignKey(Parent, on_delete=models.CASCADE,
-    #                              verbose_name='Покупатель', related_name='cart_customer')  # User -> Parent
 
     student = models.ForeignKey(Student, on_delete=models.CASCADE, null=True, blank=True,
                                 verbose_name='Ученик', related_name='cart_student')  # TODO: Это не работает. Исправить.

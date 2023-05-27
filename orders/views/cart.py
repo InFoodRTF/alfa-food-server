@@ -1,7 +1,8 @@
 from datetime import datetime
 
+from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.shortcuts import get_object_or_404
+from rest_framework.generics import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -9,14 +10,13 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from accounts.models import Parent
-from classes.models import Student
-from common.services import all_objects, filter_objects
+from classes.models.student import Student
+from common.services import all_objects, filter_objects, date_format_validate
 from orders.models.cart import CartItem, Cart
 from orders.models.menu import MenuItem, Menu
 from orders.models.order import OrderItem
 from orders.serializers.cart import CartSerializer
 from orders.serializers.order import OrderSerializer, OrderParentSerializer
-from orders.services import date_format_validate
 
 
 class CartViewSet(ModelViewSet):
@@ -36,7 +36,7 @@ class CartViewSet(ModelViewSet):
         # except (Cart.DoesNotExist, KeyError):
         #     return Response({"error": "Requested Cart does not exist"}, status=status.HTTP_404_NOT_FOUND)
 
-        if isinstance(user.parent, Parent):
+        if hasattr(user, 'parent'):
             instance = self.get_object()
 
             if request.query_params:

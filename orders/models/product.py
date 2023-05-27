@@ -1,6 +1,6 @@
 from django.db import models
 
-from classes.models import MealCategory
+from classes.models.meal_features import MealCategory
 from common.models import DateTimeFieldsModel
 from decimal import Decimal
 

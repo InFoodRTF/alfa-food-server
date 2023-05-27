@@ -1,6 +1,6 @@
 from datetime import date
 
-from django.shortcuts import get_object_or_404
+from rest_framework.generics import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.pagination import LimitOffsetPagination
@@ -8,7 +8,8 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from accounts.models import Parent
-from classes.models import Student, MealCategory
+from classes.models.meal_features import MealCategory
+from classes.models.student import Student
 from common.services import all_objects, create_objects
 from orders.models.order import OrderItem, Order
 from orders.permissons import IsOwnerOrStaff
