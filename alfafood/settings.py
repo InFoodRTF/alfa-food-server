@@ -75,6 +75,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 CSRF_TRUSTED_ORIGINS = [
   "https://alfafood.gamerzombar.repl.co",
+  "https://alfa-food-client.vercel.app"
 ]
 
 ROOT_URLCONF = 'alfafood.urls'
