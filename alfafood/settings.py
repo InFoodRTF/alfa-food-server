@@ -160,11 +160,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
   'DEFAULT_PAGINATION_CLASS':
   'rest_framework.pagination.LimitOffsetPagination',
-  'DEFAULT_AUTHENTICATION_CLASSES': [
-    # 'rest_framework.authentication.BasicAuthentication',
-    # 'rest_framework.authentication.SessionAuthentication',
-    'knox.auth.TokenAuthentication',
-  ],
+  'DEFAULT_AUTHENTICATION_CLASSES': ('knox.auth.TokenAuthentication',),
   'DATETIME_FORMAT':
   "%d.%m.%Y %H:%M:%S",
   'DATE_FORMAT':
