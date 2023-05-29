@@ -1,3 +1,4 @@
+from django.http import Http404
 from rest_framework import status
 from rest_framework.decorators import action, permission_classes
 from rest_framework.generics import get_object_or_404
@@ -149,8 +150,12 @@ class MenuViewSet(ModelViewSet):
         queryset = self.get_queryset()
 
         user = self.request.user
-        if isinstance(user.parent, Parent):
-            queryset = queryset.first()
+        if hasattr(user, 'parent'):
+            if queryset.exists():
+                queryset = queryset.first()
+            else:
+                raise Http404
+
             serializer = self.get_serializer(queryset)
         else:
             serializer = self.get_serializer(queryset, many=True)
