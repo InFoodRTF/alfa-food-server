@@ -311,10 +311,16 @@ class StudentAttendanceViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
         mark_attendance = request.data.get('mark_attendance')
 
+        if mark_attendance is None:
+            return Response({'detail': 'mark_attendance not provided.'})
+
         if mark_attendance == 'true':
             instance.mark_attendance = AttendanceChoice.PRESENT
         elif mark_attendance == 'false':
             instance.mark_attendance = AttendanceChoice.ABSENT
+        else:
+            return Response({'detail': 'mark_attendance must be a boolean string.'})
+
 
         instance.save()
         serializer = self.get_serializer(instance)
