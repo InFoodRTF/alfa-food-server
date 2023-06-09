@@ -207,7 +207,7 @@ class CartViewSet(ModelViewSet):
                     menu_item = cart_item.product
 
                     if menu_item.quantity > 1:
-                        menu_item.quantity -= cart_item.quantity # TODO: сейчас вообще может уйти в минус
+                        menu_item.quantity -= cart_item.quantity  # TODO: сейчас вообще может уйти в минус
                         menu_item.save()
                     else:
                         continue

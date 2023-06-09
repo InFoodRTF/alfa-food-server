@@ -27,6 +27,7 @@ from django.conf.urls.static import static
 from classes.views.attendance import AttendanceViewSet, StudentAttendanceViewSet #GradeAttendanceViewSet,
 from classes.views.grade import GradeViewSet
 from classes.views.student import StudentViewSet
+from orders.reports.view import ReportAPIView
 from orders.views.cart import CartViewSet
 from orders.views.menu import MenuViewSet, MenuItemViewSet
 from orders.views.order import OrderViewSet, OrderItemViewSet
@@ -53,6 +54,8 @@ router.register(r'menuitems', MenuItemViewSet, basename="MenuItem")
 # To CART urls
 router.register(r'cart', CartViewSet, basename="Cart")
 
+#DELETE_OR_CHANGE
+# router.register(r'report', ReportAPIView, basename='report')
 
 class HomepageView(View):
     '''вывод данных профессий'''
@@ -67,6 +70,7 @@ urlpatterns = [
     path('user/', UserAPIView.as_view()),
     path('auth/', include('accounts.urls')),
     # path('canteen/', MyOwnView.as_view())
+    path('report/', ReportAPIView.as_view())
 ]
 
 urlpatterns += router.get_urls()

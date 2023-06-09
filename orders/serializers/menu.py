@@ -28,7 +28,7 @@ class MenuSerializer(ModelSerializer):
     @staticmethod
     def get_items(obj):
         result = {}
-        # Либо придумай как по другому делать сортировку.
+        # TODO: тут костыль, надо подтягивать с БД.
         meal_categories = ['Завтрак', 'Обед', 'Полдник', 'Ужин']
 
         for item in obj.menu_set.all():
