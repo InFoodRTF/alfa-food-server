@@ -18,21 +18,43 @@ from orders.models.order import Order, OrderItem
 
 
 class Report:
-    def __init__(self, date, file_extension):
+    def __init__(self, user_role, date, file_extension):
+        self.user_role = user_role
         self.date = date
         self.validated_date = date_format_validate(date).date()
         self.file_extension = file_extension
-        self.file_name = f"report_{date}.{self.file_extension}"
+        self.file_name = f"{user_role}_report_{date}.{self.file_extension}"
         self.file_path = os.path.join(settings.BASE_DIR, 'static', 'reports', self.file_name)
+        self.content = ""
 
     def generate(self):
         if self.file_extension == 'pdf':
             # self._generate_pdf_report()
-            self.generate_pdf()
+            if self.user_role == "canteen":
+                self.content = self._generate_canteen_pdf_report()
+            elif self.user_role == "teacher":
+                self.content = self._generate_teacher_pdf_report()
         elif self.file_extension == 'xlsx':
-            self._generate_excel_report()
+            ...
+            # self._generate_excel_report()
 
-    def generate_pdf(self):
+    def _generate_teacher_pdf_report(self):
+        queryset = OrderItem.objects.filter(order_id__order_date=self.validated_date)
+
+        result = {}
+
+        for order_item in queryset:
+            result.setdefault(order_item.order_id.student_id, {})\
+                .update({order_item.product_name: order_item.quantity if
+                        result[order_item.order_id.student_id].get(order_item.product_name) is None else
+                        result[order_item.order_id.student_id].get(order_item.product_name)+order_item.quantity})
+
+        table_data = [
+            ["Приём пищи", "Наименование блюда", "Количество порций"]
+        ]
+
+
+    def _generate_canteen_pdf_report(self):
         # Получение данных из модели OrderItem
         queryset = OrderItem.objects.filter(order_id__order_date=self.validated_date)
 
@@ -152,7 +174,6 @@ class Report:
 
         elements.append(Spacer(1, 30))
 
-
         # Название первой таблицы
         text1 = Paragraph("Обобщающая таблица", custom_paragraph_style)
         elements.append(text1)
@@ -179,71 +200,105 @@ class Report:
         doc.build(elements)
 
         buffer.seek(0)  # Перемещение указателя в начало буфера
-        self.content = buffer.getvalue()  # Получение данных PDF из буфера
+
+        result_content = buffer.getvalue()  # Получение данных PDF из буфера
 
         # Здесь вы можете использовать pdf_data по своему усмотрению, например, отправить его по электронной почте или передать веб-серверу.
 
         buffer.close()  # Закрытие буфера
 
-    def _generate_pdf_report(self):
-        # Получение всех заказов блюд для выбранной даты, отсортированных по дате
-        orders = Order.objects.filter(order_date=self.date)
+        return result_content
 
-        # Создание PDF-документа
-        buffer = BytesIO()
-        pdf = canvas.Canvas(buffer, pagesize=letter)
+    # def _generate_pdf_report(self):
+    #     # Получение всех заказов блюд для выбранной даты, отсортированных по дате
+    #     orders = Order.objects.filter(order_date=self.date)
+    #
+    #     # Создание PDF-документа
+    #     buffer = BytesIO()
+    #     pdf = canvas.Canvas(buffer, pagesize=letter)
+    #
+    #     pdfmetrics.registerFont(TTFont('FreeSans', 'FreeSans.ttf'))
+    #     pdf.setFont("FreeSans", 12)
+    #
+    #     # Запись информации о заказах в PDF
+    #     y = 700
+    #     for order in orders:
+    #         text = f"Дата заказа: {order.order_date}, Блюдо: {order.parent_id}, Количество: {order.student_id}"
+    #         pdf.drawString(100, y, text)
+    #         y -= 20
+    #
+    #     pdf.showPage()
+    #     pdf.save()
+    #
+    #     # Получение содержимого PDF-документа
+    #     buffer.seek(0)
+    #     self.content = buffer.getvalue()
+    #     buffer.close()
 
-        pdfmetrics.registerFont(TTFont('FreeSans', 'FreeSans.ttf'))
-        pdf.setFont("FreeSans", 12)
-
-        # Запись информации о заказах в PDF
-        y = 700
-        for order in orders:
-            text = f"Дата заказа: {order.order_date}, Блюдо: {order.parent_id}, Количество: {order.student_id}"
-            pdf.drawString(100, y, text)
-            y -= 20
-
-        pdf.showPage()
-        pdf.save()
-
-        # Получение содержимого PDF-документа
-        buffer.seek(0)
-        self.content = buffer.getvalue()
-        buffer.close()
-
-    def _generate_excel_report(self):
-        # Создание нового Excel-документа
-        workbook = openpyxl.Workbook()
-        sheet = workbook.active
-
-        # Получение всех заказов блюд для выбранной даты, отсортированных по дате
-        orders = Order.objects.filter(order_date=self.date)
-
-        # Создаю хедер для таблицы
-        sheet.append(("Название блюда", ""))
-
-        # Запись информации о заказах в Excel
-        row = 1
-        for order in orders:
-            sheet.cell(row=row, column=1, value=str(order.order_date))
-            sheet.cell(row=row, column=2, value=order.parent_id.get_full_name())
-            sheet.cell(row=row, column=3, value=order.student_id.get_full_name())
-            row += 1
-
-        # Настройка ширины столбцов, костылёк если шо
-        sheet.column_dimensions['A'].width = 15
-        sheet.column_dimensions['B'].width = 30
-        sheet.column_dimensions['C'].width = 30
-
-        # Сохранение Excel-документа в памяти
-        buffer = BytesIO()
-        workbook.save(buffer)
-
-        # Получение содержимого Excel-документа
-        buffer.seek(0)
-        self.content = buffer.getvalue()
-
-        buffer.close()
+    # def _generate_excel_report(self):
+    #     # Создание нового Excel-документа
+    #     workbook = openpyxl.Workbook()
+    #     sheet = workbook.active
+    #
+    #     # Получение данных из модели OrderItem
+    #     queryset = OrderItem.objects.filter(order_id__order_date=self.validated_date)
+    #
+    #     # Преобразование обработанных данных в список списков
+    #     first_table_data = [
+    #         ["Приём пищи", "Наименование блюда", "Количество порций"]
+    #     ]
+    #
+    #     second_table_data = [
+    #         ["Наименование блюда", "Количество порций"]
+    #     ]
+    #
+    #     queryset = sorted(queryset, key=lambda x: ['Завтрак', 'Обед', 'Полдник', 'Ужин'].index(x.meal_category))
+    #
+    #     # Обработка данных для объединения и суммирования
+    #     first_table_processed_data = {}
+    #
+    #     second_table_processed_data = {}
+    #
+    #     for item in queryset:
+    #         category = item.meal_category or ""
+    #         product = item.product_name or ""
+    #         quantity = item.quantity or 0
+    #
+    #         if category not in first_table_processed_data:
+    #             first_table_processed_data[category] = {
+    #                 "products": {},
+    #             }
+    #
+    #         if product not in first_table_processed_data[category]["products"]:
+    #             first_table_processed_data[category]["products"][product] = 0
+    #
+    #         first_table_processed_data[category]["products"][product] += quantity
+    #
+    #         second_table_processed_data[product] = second_table_processed_data.get(product, 0) + quantity
+    #
+    #     for category, values in first_table_processed_data.items():
+    #         first_index = len(first_table_data) if len(first_table_data) != 0 else 1
+    #         for product, quantity in values["products"].items():
+    #             first_table_data.append([category, product, quantity])
+    #         rows_to_merge = (first_index, len(first_table_data) - 1)
+    #         # Добавление объединения ячеек в Excel-таблицу
+    #         sheet.merge_cells(start_row=rows_to_merge[0], start_column=1, end_row=rows_to_merge[1], end_column=1)
+    #
+    #     for row in first_table_data:
+    #         sheet.append(row)
+    #
+    #     for row in second_table_data:
+    #         sheet.append(row)
+    #
+    #     # Сохранение Excel-документа в памяти
+    #     buffer = BytesIO()
+    #     workbook.save(buffer)
+    #
+    #     # Получение содержимого Excel-документа
+    #     buffer.seek(0)
+    #     self.content = buffer.getvalue()
+    #
+    #     buffer.close()
 
     def get_or_create(self):
         # TODO: Пока что отключил проверку на существование, т.к. не все условия, а просто присутсвие.

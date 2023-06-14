@@ -204,7 +204,7 @@ class CartViewSet(ModelViewSet):
                 for cart_item in cart_items:
 
                     # menu_item = MenuItem.objects.get(pk=cart_item.product) # TODO:Сделать сообщение о том, что закончился товар
-                    menu_item = cart_item.product
+                    menu_item = cart_item.menu_item
 
                     if menu_item.quantity > 1:
                         menu_item.quantity -= cart_item.quantity  # TODO: сейчас вообще может уйти в минус
@@ -214,9 +214,9 @@ class CartViewSet(ModelViewSet):
 
                     order_item = OrderItem(
                         order_id=order,
-                        product_name=cart_item.product.product.name,
-                        meal_category=cart_item.product.product.meal_category,
-                        price=cart_item.product.product.price,
+                        product_name=cart_item.menu_item.product.name,
+                        meal_category=cart_item.menu_item.product.meal_category,
+                        price=cart_item.menu_item.product.price,
                         quantity=cart_item.quantity,
                     )
                     order_item.save()

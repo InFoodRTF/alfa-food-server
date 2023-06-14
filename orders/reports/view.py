@@ -7,12 +7,15 @@ from django.http import HttpResponse
 class ReportAPIView(APIView):
     def post(self, request):
         date = request.data.get('date')
+        user = self.request.user
+        user_role = "teacher" if hasattr(user, 'teacher') else "canteen"
+
         file_extension = request.data.get('file_extension')
 
         if file_extension not in ['pdf', 'xlsx']:
             return HttpResponse('Invalid file extension. Only allowed "pdf" or "xlsx"', status=400)
 
-        report = Report(date, file_extension)
+        report = Report(user_role, date, file_extension)
         file_path, content_type = report.get_or_create()
 
         # Отправляем файл пользователю в качестве вложения
