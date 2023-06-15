@@ -50,7 +50,7 @@ class MenuAdmin(ModelAdmin):
     formfield_overrides = {
         models.BooleanField: {'widget': CheckboxInput(attrs={'style': 'width:20px;height:20px;'})}
     }
-    list_display = ('date_implementation', 'created', 'active')
+    list_display = ('name', 'date_implementation', 'created', 'active')
     # list_filter = ('active', )
     # list_filter = (
     #         ('date_implementation', DateFieldListFilter),

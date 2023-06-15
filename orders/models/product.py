@@ -10,8 +10,8 @@ class Product(DateTimeFieldsModel):
 
     class Meta:
         db_table = "products"
-        verbose_name = "Товар"
-        verbose_name_plural = "Товары"
+        verbose_name = "Блюдо"
+        verbose_name_plural = "Блюда"
 
     name = models.CharField('Название товара', max_length=256, db_index=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))

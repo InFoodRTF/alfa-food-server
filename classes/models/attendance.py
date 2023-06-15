@@ -48,8 +48,8 @@ class Attendance(models.Model):
 class StudentAttendance(models.Model):
     class Meta:
         db_table = "student_attendance"
-        verbose_name = "Посещаемость студента"
-        verbose_name_plural = "Посещаемость студента"
+        verbose_name = "Посещаемость ученика"
+        verbose_name_plural = "Посещаемость ученика"
 
     attendance = models.ForeignKey(Attendance, on_delete=models.CASCADE, null=True,
                                    related_name='student_attendances')

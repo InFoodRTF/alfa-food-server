@@ -215,7 +215,7 @@ class CartViewSet(ModelViewSet):
                     order_item = OrderItem(
                         order_id=order,
                         product_name=cart_item.menu_item.product.name,
-                        meal_category=cart_item.menu_item.product.meal_category,
+                        meal_category=cart_item.menu_item.product.meal_category.category_name,
                         price=cart_item.menu_item.product.price,
                         quantity=cart_item.quantity,
                     )

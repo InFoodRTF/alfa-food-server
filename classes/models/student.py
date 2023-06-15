@@ -8,8 +8,8 @@ from accounts.models import Parent
 class Student(models.Model):
     class Meta:
         db_table = "students"
-        verbose_name = "Студент"
-        verbose_name_plural = "Студенты"
+        verbose_name = "Ученик"
+        verbose_name_plural = "Ученики"
     # parent_id = models.ForeignKey(User, on_delete=models.RESTRICT, verbose_name="Идентификатор пользователя", )
     last_name = models.CharField(max_length=150, blank=False)
     first_name = models.CharField(max_length=150, blank=False)
